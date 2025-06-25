@@ -1,3 +1,11 @@
+using EComm.DataAccess.Data;
+using EComm.DataAccess.Repository;
+using EComm.DataAccess.Repository.IRepository;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using EComm.Utility;
+using Microsoft.AspNetCore.Identity.UI.Services;
+
 namespace ShopHupECommCore
 {
     public class Program
@@ -6,6 +14,25 @@ namespace ShopHupECommCore
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
+
+
+            builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = $"/Identity/Account/Login";
+                options.LogoutPath = $"/Identity/Account/Logout";
+                options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
+            });
+
+            builder.Services.AddRazorPages();
+
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            builder.Services.AddScoped<IEmailSender, EmailSender>();
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
@@ -21,13 +48,14 @@ namespace ShopHupECommCore
 
             app.UseHttpsRedirection();
             app.UseRouting();
-
+            app.UseAuthentication();
             app.UseAuthorization();
+            app.MapRazorPages();
 
             app.MapStaticAssets();
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}")
+                pattern: "{area=Customer}/{controller=Home}/{action=Index}/{id?}")
                 .WithStaticAssets();
 
             app.Run();
