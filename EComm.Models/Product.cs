@@ -49,5 +49,7 @@ namespace EComm.Models
         public Category Category { get; set; }
         [ValidateNever]
         public string ImageUrl { get; set; }
+
+        //can delete this line ok<<<<<
     }
 }

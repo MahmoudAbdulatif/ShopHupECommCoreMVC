@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using EComm.Utility;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Stripe;
 
 namespace ShopHupECommCore
 {
@@ -17,7 +18,7 @@ namespace ShopHupECommCore
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-
+            builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
 
 
             builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
@@ -51,6 +52,8 @@ namespace ShopHupECommCore
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapRazorPages();
+
+            StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:Secretkey").Get<string>();
 
             app.MapStaticAssets();
             app.MapControllerRoute(
